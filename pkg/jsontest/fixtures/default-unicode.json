@@ -1,0 +1,73 @@
+{
+  "traceId": "AAAAAAAAAAAAAAAAAAAAEQ==",
+  "spanId": "AAAAAAAAAAM=",
+  "operationName": "someoperation",
+  "references": [
+    {
+      "refType": "CHILD_OF",
+      "traceID": "re32423423sdf3",
+      "spanID": "re32423423sdf3"
+    }
+  ],
+  "startTime": 1573044697810690,
+  "startTimeMillis": 1573044697810,
+  "duration": 7461,
+  "tags": [
+    {
+      "key" : "unicode1",
+      "type" : "string",
+      "value" : "+ľšľččťžž00ššľľĘӿӿӻӻӻ"
+    },
+    {
+      "key" : "unicode1",
+      "type" : "string",
+      "value" : "+ľšľččťžž00ššľľĘӿӿӻӻӻ"
+    },
+    {
+      "key" : "unicode1",
+      "type" : "string",
+      "value" : "+ľšľččťžž00ššľľĘӿӿӻӻӻ"
+    },
+    {
+      "key" : "unicode1",
+      "type" : "string",
+      "value" : "+ľšľččťžž00ššľľĘӿӿӻӻӻ"
+    }
+  ],
+  "process": {
+    "serviceName": "query11-service",
+    "tags": [
+      {
+        "key" : "jaeger.version",
+        "type" : "string",
+        "value" : "Go-2.19.0"
+      },
+      {
+        "key" : "hostname",
+        "type" : "string",
+        "value" : "dhcp-000-000.bar.foo.com"
+      },
+      {
+        "key" : "ip",
+        "type" : "string",
+        "value" : "10.10.10.109"
+      },
+      {
+        "key" : "client-uuid",
+        "type" : "string",
+        "value" : "31ef38022e52fde5"
+      }
+    ]
+  },
+  "logs": [
+    {
+      "timestamp": 1573044697818172,
+      "fields": [
+      ]
+    },
+    {
+      "timestamp": 1573044697818172,
+      "fields": []
+    }
+  ]
+}
