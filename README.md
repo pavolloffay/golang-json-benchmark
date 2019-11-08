@@ -18,5 +18,5 @@ BenchmmarkXX    44541     27849 ns/op    29440 B/op     158 allocs/op
 
 * stdlib marshalling performance drops when unmarshalling tag map (`span.tag`/`span.process.tag`) `map[string]interface{}`
 
-[ci-img]: https://github.com/pavolloffay/golang-json-benchmark/workflows/CI%20Workflow/badge.svg
+[ci-img]: https://github.com/pavolloffay/golang-json-benchmark/workflows/Benchmark/badge.svg
 [ci]: https://github.com/pavolloffay/golang-json-benchmark/actions
