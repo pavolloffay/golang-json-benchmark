@@ -14,4 +14,4 @@ BenchmmarkXX    44541     27849 ns/op    29440 B/op     158 allocs/op
 
 ## Conclusions
 
-* stdlib marshalling performance drops when unmarshalling `map[string]interface{}`
+* stdlib marshalling performance drops when unmarshalling tag map (`span.tag`/`span.process.tag`) `map[string]interface{}`
