@@ -1,6 +1,7 @@
 package jsontest
 
 import (
+	"encoding/json"
 	"testing"
 
 	jsoniter "github.com/json-iterator/go"
@@ -9,22 +10,26 @@ import (
 )
 
 func TestParsingFixtureJsoniter(t *testing.T) {
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	var jsoniter = jsoniter.ConfigCompatibleWithStandardLibrary
 	b, err := loadFixture("default-unicode.json")
 	require.NoError(t, err)
-	assert.NotNil(t, b)
 
 	span := &Span{}
-	err = json.Unmarshal(b, span)
+	err = jsoniter.Unmarshal(b, span)
+	require.NoError(t, err)
+	spanStd := &Span{}
+	err = json.Unmarshal(b, spanStd)
+	require.NoError(t, err)
+	// unmarshal is the same as stdlib
+	assert.Equal(t, spanStd, span)
+
+	bb, err := jsoniter.Marshal(span)
 	require.NoError(t, err)
 
-	bb, err := json.Marshal(span)
+	spanStd = &Span{}
+	err = json.Unmarshal(bb, spanStd)
 	require.NoError(t, err)
-
-	span2 := &Span{}
-	err = json.Unmarshal(bb, span2)
-	require.NoError(t, err)
-	assert.Equal(t, span, span2)
+	assert.Equal(t, spanStd, span)
 }
 
 func BenchmarkUnmarshalJsoninter(b *testing.B) {

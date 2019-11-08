@@ -15,4 +15,4 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v1
     - name: Benchmark
-      run: make bench
+      run: make bench-all

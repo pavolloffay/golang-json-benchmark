@@ -1,13 +1,25 @@
 BENCHTIME?=1s
 GOMAXPROCS?=1
+BENCH?=.
 
 .PHONY:test
 test:
 	go test ./pkg/jsontest
 
+.PHONY:bench-all
+bench-all: bench-marshal bench-unmarshal
+
 .PHONY:bench
 bench:
-	GOMAXPROCS=${GOMAXPROCS} go test -bench=. -test.benchtime=${BENCHTIME} -benchmem -cpuprofile profile_cpu.out ./pkg/jsontest
+	GOMAXPROCS=${GOMAXPROCS} go test -bench=${BENCH} -test.benchtime=${BENCHTIME} -benchmem -cpuprofile profile_cpu.out ./pkg/jsontest
+
+.PHONY:bench-unmarshal
+bench-unmarshal:
+	BENCH=Unmarshal $(MAKE) bench
+
+.PHONY:bench-marshall
+bench-marshal:
+	BENCH=Marshal $(MAKE) bench
 
 .PHONY:profile
 profile:
