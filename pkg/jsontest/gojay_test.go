@@ -2,6 +2,7 @@ package jsontest
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/francoispqt/gojay"
@@ -18,10 +19,16 @@ func TestParsingFixtureGojay(t *testing.T) {
 	err = gojay.Unmarshal(b, span)
 	require.NoError(t, err)
 
+	fmt.Println(span.Logs[1].Fields)
+	fmt.Println(span.Logs[1].Fields == nil)
+
 	spanStd := &Span{}
 	err = json.Unmarshal(b, spanStd)
 	require.NoError(t, err)
-	assert.Equal(t, spanStd, span)
+	assert.EqualValues(t, spanStd, span)
+
+	fmt.Println(spanStd.Logs[1].Fields)
+	fmt.Println(spanStd.Logs[1].Fields == nil)
 
 	bb, err := gojay.Marshal(span)
 	require.NoError(t, err)
@@ -43,10 +50,6 @@ func BenchmarkUnmarshalGojay(b *testing.B) {
 	benchmarkUnmarshal(b, gojay.Unmarshal)
 }
 
-type KeyValueArr []*KeyValue
-type LogArr []*Log
-type ReferencesArr []*Reference
-
 func (s *Span) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("operationName", s.OperationName)
 	enc.StringKey("spanId", string(s.SpanID))
@@ -55,12 +58,9 @@ func (s *Span) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.Uint64Key("startTimeMillis", s.StartTimeMillis)
 	enc.Uint64Key("duration", s.Duration)
 	enc.ObjectKey("process", &s.Process)
-	tags := convertKeyValuesToArrType(s.Tags)
-	enc.ArrayKey("tags", &tags)
-	logs := convertLogsToArrType(s.Logs)
-	enc.ArrayKey("logs", &logs)
-	refs := convertReferencesToArrType(s.References)
-	enc.ArrayKey("references", &refs)
+	enc.ArrayKey("tags", &s.Tags)
+	enc.ArrayKey("logs", &s.Logs)
+	enc.ArrayKey("references", &s.References)
 }
 func (s *Span) IsNil() bool {
 	return s == nil
@@ -68,8 +68,7 @@ func (s *Span) IsNil() bool {
 
 func (p *Process) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("serviceName", p.ServiceName)
-	tags := convertKeyValuesToArrType(p.Tags)
-	enc.ArrayKey("tags", &tags)
+	enc.ArrayKey("tags", &p.Tags)
 }
 func (p *Process) IsNil() bool {
 	return p == nil
@@ -102,22 +101,18 @@ func (logs *LogArr) IsNil() bool {
 }
 func (l *Log) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.Uint64Key("timestamp", l.Timestamp)
-	tags := make(KeyValueArr, len(l.Fields))
-	for i := 0; i < len(l.Fields); i++ {
-		tags[i] = &l.Fields[i]
-	}
-	enc.ArrayKey("fields", &tags)
+	enc.ArrayKey("fields", &l.Fields)
 }
 func (l *Log) IsNil() bool {
 	return l == nil
 }
 
-func (refs *ReferencesArr) MarshalJSONArray(enc *gojay.Encoder) {
+func (refs *ReferenceArr) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *refs {
 		enc.Object(e)
 	}
 }
-func (refs *ReferencesArr) IsNil() bool {
+func (refs *ReferenceArr) IsNil() bool {
 	return refs == nil
 }
 func (r *Reference) MarshalJSONObject(enc *gojay.Encoder) {
@@ -154,24 +149,11 @@ func (s *Span) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	case "duration":
 		return dec.AddUint64(&s.Duration)
 	case "tags":
-		tags := KeyValueArr{}
-		err := dec.AddArray(&tags)
-		if err == nil {
-			s.Tags = convertKeyValueFromArrType(tags)
-		}
-		return err
+		return dec.AddArray(&s.Tags)
 	case "logs":
-		logs := LogArr{}
-		err := dec.AddArray(&logs)
-		if err == nil {
-			s.Logs = convertLogsFromArrType(logs)
-		}
+			return dec.AddArray(&s.Logs)
 	case "references":
-		refs := ReferencesArr{}
-		err := dec.AddArray(&refs)
-		if err == nil {
-			s.References = convertReferencesFromArrType(refs)
-		}
+		return dec.AddArray(&s.References)
 	case "process":
 		return dec.AddObject(&s.Process)
 	}
@@ -186,11 +168,7 @@ func (p *Process) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	case "serviceName":
 		return dec.AddString(&p.ServiceName)
 	case "tags":
-		tags := KeyValueArr{}
-		err := dec.AddArray(&tags)
-		if err == nil {
-			p.Tags = convertKeyValueFromArrType(tags)
-		}
+		return dec.AddArray(&p.Tags)
 	}
 	return nil
 }
@@ -241,11 +219,7 @@ func (l *Log) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	case "timestamp":
 		return dec.AddUint64(&l.Timestamp)
 	case "fields":
-		tags := KeyValueArr{}
-		err := dec.AddArray(&tags)
-		if err == nil {
-			l.Fields = convertKeyValueFromArrType(tags)
-		}
+		return dec.AddArray(&l.Fields)
 	}
 	return nil
 }
@@ -253,7 +227,7 @@ func (l *Log) NKeys() int {
 	return 0
 }
 
-func (refs *ReferencesArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
+func (refs *ReferenceArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	ref := Reference{}
 	err := dec.AddObject(&ref)
 	if err != nil {
@@ -307,14 +281,14 @@ func convertKeyValueFromArrType(kvs KeyValueArr) []KeyValue {
 	return tags
 }
 
-func convertReferencesToArrType(refs []Reference) ReferencesArr {
-	refsArr := make(ReferencesArr, len(refs))
+func convertReferencesToArrType(refs []Reference) ReferenceArr {
+	refsArr := make(ReferenceArr, len(refs))
 	for i := 0; i < len(refs); i++ {
 		refsArr[i] = &refs[i]
 	}
 	return refsArr
 }
-func convertReferencesFromArrType(refs ReferencesArr) []Reference {
+func convertReferencesFromArrType(refs ReferenceArr) []Reference {
 	refsArr := make([]Reference, len(refs))
 	for i := 0; i < len(refs); i++ {
 		refsArr[i] = *refs[i]

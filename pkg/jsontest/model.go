@@ -45,6 +45,10 @@ const (
 	BinaryType ValueType = "binary"
 )
 
+type KeyValueArr []*KeyValue
+type LogArr []*Log
+type ReferenceArr []*Reference
+
 // Span is ES database representation of the domain span.
 type Span struct {
 	TraceID       TraceID     `json:"traceID"`
@@ -52,17 +56,17 @@ type Span struct {
 	ParentSpanID  SpanID      `json:"parentSpanID,omitempty"` // deprecated
 	Flags         uint32      `json:"flags,omitempty"`
 	OperationName string      `json:"operationName"`
-	References    []Reference `json:"references"`
+	References    ReferenceArr `json:"references"`
 	StartTime     uint64      `json:"startTime"` // microseconds since Unix epoch
 	// ElasticSearch does not support a UNIX Epoch timestamp in microseconds,
 	// so Jaeger maps StartTime to a 'long' type. This extra StartTimeMillis field
 	// works around this issue, enabling timerange queries.
 	StartTimeMillis uint64     `json:"startTimeMillis"`
 	Duration        uint64     `json:"duration"` // microseconds
-	Tags            []KeyValue `json:"tags"`
+	Tags            KeyValueArr `json:"tags"`
 	// Alternative representation of tags for better kibana support
 	Tag     map[string]interface{} `json:"tag,omitempty"`
-	Logs    []Log                  `json:"logs"`
+	Logs    LogArr                  `json:"logs"`
 	Process Process                `json:"process,omitempty"`
 }
 
@@ -76,7 +80,7 @@ type Reference struct {
 // Process is the process emitting a set of spans
 type Process struct {
 	ServiceName string     `json:"serviceName"`
-	Tags        []KeyValue `json:"tags"`
+	Tags        KeyValueArr `json:"tags"`
 	// Alternative representation of tags for better kibana support
 	Tag map[string]interface{} `json:"tag,omitempty"`
 }
@@ -84,7 +88,7 @@ type Process struct {
 // Log is a log emitted in a span
 type Log struct {
 	Timestamp uint64     `json:"timestamp"`
-	Fields    []KeyValue `json:"fields"`
+	Fields    KeyValueArr `json:"fields"`
 }
 
 // KeyValue is a key-value pair with typed value.

@@ -1,7 +1,6 @@
 package jsontest
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +19,6 @@ func TestParsingFixtureFastJson(t *testing.T) {
 	span := &Span{}
 	err = fastJsonUnmarshal(b, span)
 	require.NoError(t, err)
-	fmt.Println(span.StartTime)
 }
 
 func BenchmarkUnmarshalFastjson(b *testing.B) {
@@ -73,14 +71,14 @@ func fastJsonUnmarshal(json []byte, int interface{}) error {
 	}
 	valArr := valSpan.GetArray("tags")
 	if valArr != nil {
-		span.Tags = make([]KeyValue, len(valArr))
+		span.Tags = make([]*KeyValue, len(valArr))
 		for i := 0; i < len(valArr); i++ {
 			span.Tags[i] = parseKeyValue(valArr[i])
 		}
 	}
 	valArr = valSpan.GetArray("logs")
 	if valArr != nil {
-		span.Logs = make([]Log, len(valArr))
+		span.Logs = make([]*Log, len(valArr))
 		for i := 0; i < len(valArr); i++ {
 			span.Logs[i] = parseLog(valArr[i])
 		}
@@ -89,8 +87,8 @@ func fastJsonUnmarshal(json []byte, int interface{}) error {
 	return nil
 }
 
-func parseLog(o *fastjson.Value) Log {
-	log := Log{}
+func parseLog(o *fastjson.Value) *Log {
+	log := &Log{}
 	val := o.Get("timestamp")
 	if val != nil {
 		valUint, err := val.Uint64()
@@ -100,7 +98,7 @@ func parseLog(o *fastjson.Value) Log {
 	}
 	valArr := o.GetArray("fields")
 	if valArr != nil {
-		log.Fields = make([]KeyValue, len(valArr))
+		log.Fields = make([]*KeyValue, len(valArr))
 		for i := 0; i < len(valArr); i++ {
 			log.Fields[i] = parseKeyValue(valArr[i])
 		}
@@ -108,8 +106,8 @@ func parseLog(o *fastjson.Value) Log {
 	return log
 }
 
-func parseKeyValue(o *fastjson.Value) KeyValue {
-	kv := KeyValue{}
+func parseKeyValue(o *fastjson.Value) *KeyValue {
+	kv := &KeyValue{}
 	val := o.Get("value")
 	if val != nil {
 		// TODO handle types properly
@@ -136,7 +134,7 @@ func parseProcess(o *fastjson.Object) *Process {
 	if val != nil {
 		arr, err := val.Array()
 		if err == nil {
-			p.Tags = make([]KeyValue, len(arr))
+			p.Tags = make([]*KeyValue, len(arr))
 			for i := 0; i < len(arr); i++ {
 				p.Tags[i] = parseKeyValue(arr[i])
 			}

@@ -81,7 +81,7 @@
   },
   "logs": [
     {
-      "timestamp": 1573044697818172,
+      "timestamp": 1573044697818173,
       "fields": [
         {
           "key" : "trace_ids",
