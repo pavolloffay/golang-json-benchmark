@@ -1,0 +1,50 @@
+{
+  "traceId": "AAAAAAAAAAAAAAAAAAAAEQ==",
+  "spanId": "AAAAAAAAAAM=",
+  "operationName": "someoperation",
+  "references": [
+    {
+      "refType": "CHILD_OF",
+      "traceID": "re32423423sdf3",
+      "spanID": "re32423423sdf3"
+    }
+  ],
+  "startTime": 1573044697810690,
+  "startTimeMillis": 1573044697810,
+  "duration": 7461,
+  "tag": {
+    "sampler.type": "cost",
+    "sampler.param": true,
+    "span.kind": "server",
+    "http.method": "GET",
+    "http.url": "/api/traces?end=1573044698060000&limit=20&lookback=1h&maxDuration&minDuration&service=jaeger-query&start=1573041098060000",
+    "component": "net/http",
+    "http.status_code": 200,
+    "internal.span.format": "proto"
+  },
+  "process": {
+    "serviceName": "query11-service",
+    "tag": {
+      "jaeger-version":  "Go-2.19.0",
+      "hostname": "dhcp-000-000.bar.foo.com",
+      "ip": "10.10.10.109",
+      "client-uuid": "31ef38022e52fde5"
+    }
+  },
+  "logs": [
+    {
+      "timestamp": 1573044697818173,
+      "fields": [
+        {
+          "key" : "trace_ids",
+          "type" : "string",
+          "value" : "[3ff94bf405c92ae8 21b500cfb4d9bc51 1b5a8999a14f0480 6b082c235ae805f0 26b12cbc1016f356 240622fbdbec267b 6b5a44a87672b565 ec07fbe0cbb3b 2f564588a200e65f 62e24e98facf38b7]"
+        }
+      ]
+    },
+    {
+      "timestamp": 1573044697818172,
+      "fields": []
+    }
+  ]
+}

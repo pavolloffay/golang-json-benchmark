@@ -45,9 +45,10 @@ const (
 	BinaryType ValueType = "binary"
 )
 
-type KeyValueArr []*KeyValue
-type LogArr []*Log
-type ReferenceArr []*Reference
+type KeyValueArr []KeyValue
+type LogArr []Log
+type ReferenceArr []Reference
+type TagMap map[string]interface{}
 
 // Span is ES database representation of the domain span.
 type Span struct {
@@ -65,7 +66,7 @@ type Span struct {
 	Duration        uint64     `json:"duration"` // microseconds
 	Tags            KeyValueArr `json:"tags"`
 	// Alternative representation of tags for better kibana support
-	Tag     map[string]interface{} `json:"tag,omitempty"`
+	Tag     TagMap `json:"tag,omitempty"`
 	Logs    LogArr                  `json:"logs"`
 	Process Process                `json:"process,omitempty"`
 }
@@ -82,7 +83,7 @@ type Process struct {
 	ServiceName string     `json:"serviceName"`
 	Tags        KeyValueArr `json:"tags"`
 	// Alternative representation of tags for better kibana support
-	Tag map[string]interface{} `json:"tag,omitempty"`
+	Tag TagMap `json:"tag,omitempty"`
 }
 
 // Log is a log emitted in a span

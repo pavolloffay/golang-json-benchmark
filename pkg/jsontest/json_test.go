@@ -47,6 +47,14 @@ func benchmarkUnmarshal(b *testing.B, unmarshal UnmarshalFce) {
 			err = unmarshal(json, trace)
 		}
 	})
+	b.Run("default-tagmap.json", func(b *testing.B) {
+		json, err := loadFixture("default-tagmap.json")
+		require.NoError(b, err)
+		trace := &Span{}
+		for i := 0; i < b.N; i++ {
+			err = unmarshal(json, trace)
+		}
+	})
 }
 
 func benchmarkMarshal(b *testing.B, marshall MarshalFce) {
@@ -63,6 +71,17 @@ func benchmarkMarshal(b *testing.B, marshall MarshalFce) {
 	})
 	b.Run("default-unicode.json", func(b *testing.B) {
 		bb, err := loadFixture("default-unicode.json")
+		require.NoError(b, err)
+		trace := &Span{}
+		err = json.Unmarshal(bb, trace)
+		require.NoError(b, err)
+
+		for i := 0; i < b.N; i++ {
+			marshall(trace)
+		}
+	})
+	b.Run("default-tagmap.json", func(b *testing.B) {
+		bb, err := loadFixture("default-tagmap.json")
 		require.NoError(b, err)
 		trace := &Span{}
 		err = json.Unmarshal(bb, trace)

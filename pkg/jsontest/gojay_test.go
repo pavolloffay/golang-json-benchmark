@@ -19,9 +19,6 @@ func TestParsingFixtureGojay(t *testing.T) {
 	err = gojay.Unmarshal(b, span)
 	require.NoError(t, err)
 
-	fmt.Println(span.Logs[1].Fields)
-	fmt.Println(span.Logs[1].Fields == nil)
-
 	spanStd := &Span{}
 	err = json.Unmarshal(b, spanStd)
 	require.NoError(t, err)
@@ -59,6 +56,7 @@ func (s *Span) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.Uint64Key("duration", s.Duration)
 	enc.ObjectKey("process", &s.Process)
 	enc.ArrayKey("tags", &s.Tags)
+	enc.ObjectKey("tag", &s.Tag)
 	enc.ArrayKey("logs", &s.Logs)
 	enc.ArrayKey("references", &s.References)
 }
@@ -69,14 +67,23 @@ func (s *Span) IsNil() bool {
 func (p *Process) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("serviceName", p.ServiceName)
 	enc.ArrayKey("tags", &p.Tags)
+	enc.ObjectKey("tag", &p.Tag)
 }
 func (p *Process) IsNil() bool {
 	return p == nil
 }
+func (m TagMap) MarshalJSONObject(enc *gojay.Encoder) {
+	for k, v := range m {
+		enc.AddInterfaceKey(k, v)
+	}
+}
+func (m *TagMap) IsNil() bool {
+	return m == nil
+}
 
 func (kvs *KeyValueArr) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *kvs {
-		enc.Object(e)
+		enc.Object(&e)
 	}
 }
 func (kvs *KeyValueArr) IsNil() bool {
@@ -93,7 +100,7 @@ func (kv *KeyValue) IsNil() bool {
 
 func (logs *LogArr) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *logs {
-		enc.Object(e)
+		enc.Object(&e)
 	}
 }
 func (logs *LogArr) IsNil() bool {
@@ -109,7 +116,7 @@ func (l *Log) IsNil() bool {
 
 func (refs *ReferenceArr) MarshalJSONArray(enc *gojay.Encoder) {
 	for _, e := range *refs {
-		enc.Object(e)
+		enc.Object(&e)
 	}
 }
 func (refs *ReferenceArr) IsNil() bool {
@@ -149,7 +156,16 @@ func (s *Span) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	case "duration":
 		return dec.AddUint64(&s.Duration)
 	case "tags":
-		return dec.AddArray(&s.Tags)
+		err := dec.AddArray(&s.Tags)
+		if s.Tags == nil {
+			s.Tags = KeyValueArr{}
+		}
+		return err
+	case "tag":
+		if s.Tag == nil {
+			s.Tag = TagMap{}
+		}
+		return dec.AddObject(&s.Tag)
 	case "logs":
 			return dec.AddArray(&s.Logs)
 	case "references":
@@ -168,11 +184,33 @@ func (p *Process) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	case "serviceName":
 		return dec.AddString(&p.ServiceName)
 	case "tags":
-		return dec.AddArray(&p.Tags)
+		err := dec.AddArray(&p.Tags)
+		if p.Tags == nil {
+			p.Tags = KeyValueArr{}
+		}
+		return err
+	case "tag":
+		if p.Tag == nil {
+			p.Tag = TagMap{}
+		}
+		return dec.AddObject(&p.Tag)
 	}
 	return nil
 }
 func (p *Process) NKeys() int {
+	return 0
+}
+
+func (t *TagMap) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
+	var inter interface{}
+	err := dec.Interface(&inter)
+	if err != nil {
+		return err
+	}
+	(*t)[key] = inter
+	return nil
+}
+func (t *TagMap) NKeys() int {
 	return 0
 }
 
@@ -182,7 +220,7 @@ func (kvs *KeyValueArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	if err != nil {
 		return err
 	}
-	*kvs = append(*kvs, &tag)
+	*kvs = append(*kvs, tag)
 	return nil
 }
 func (kv *KeyValue) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
@@ -211,7 +249,7 @@ func (logs *LogArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	if err != nil {
 		return err
 	}
-	*logs = append(*logs, &l)
+	*logs = append(*logs, l)
 	return nil
 }
 func (l *Log) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
@@ -219,7 +257,12 @@ func (l *Log) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 	case "timestamp":
 		return dec.AddUint64(&l.Timestamp)
 	case "fields":
-		return dec.AddArray(&l.Fields)
+		err := dec.AddArray(&l.Fields)
+		// keep the array even when empty
+		if l.Fields == nil {
+			l.Fields = KeyValueArr{}
+		}
+		return err
 	}
 	return nil
 }
@@ -233,7 +276,7 @@ func (refs *ReferenceArr) UnmarshalJSONArray(dec *gojay.Decoder) error {
 	if err != nil {
 		return err
 	}
-	*refs = append(*refs, &ref)
+	*refs = append(*refs, ref)
 	return nil
 }
 func (r *Reference) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
@@ -264,49 +307,4 @@ func (r *Reference) UnmarshalJSONObject(dec *gojay.Decoder, key string) error {
 }
 func (r *Reference) NKeys() int {
 	return 0
-}
-
-func convertKeyValuesToArrType(kvs []KeyValue) KeyValueArr {
-	tags := make(KeyValueArr, len(kvs))
-	for i := 0; i < len(kvs); i++ {
-		tags[i] = &kvs[i]
-	}
-	return tags
-}
-func convertKeyValueFromArrType(kvs KeyValueArr) []KeyValue {
-	tags := make([]KeyValue, len(kvs))
-	for i := 0; i < len(kvs); i++ {
-		tags[i] = *kvs[i]
-	}
-	return tags
-}
-
-func convertReferencesToArrType(refs []Reference) ReferenceArr {
-	refsArr := make(ReferenceArr, len(refs))
-	for i := 0; i < len(refs); i++ {
-		refsArr[i] = &refs[i]
-	}
-	return refsArr
-}
-func convertReferencesFromArrType(refs ReferenceArr) []Reference {
-	refsArr := make([]Reference, len(refs))
-	for i := 0; i < len(refs); i++ {
-		refsArr[i] = *refs[i]
-	}
-	return refsArr
-}
-
-func convertLogsToArrType(logs []Log) LogArr {
-	logArr := make(LogArr, len(logs))
-	for i := 0; i < len(logs); i++ {
-		logArr[i] = &logs[i]
-	}
-	return logArr
-}
-func convertLogsFromArrType(logs LogArr) []Log {
-	logArr := make([]Log, len(logs))
-	for i := 0; i < len(logs); i++ {
-		logArr[i] = *logs[i]
-	}
-	return logArr
 }
