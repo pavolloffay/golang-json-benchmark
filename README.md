@@ -1,13 +1,17 @@
-# golang-json-benchmark
+# Golang JSON benchmark
 Golang JSON benchmark for Jaeger Elasticsearch span model.
 
-## Run
+## Run benchmark
 ```bash
-go test -bench=Stdlib -benchmem ./pkg/jsontest
+make bench
 ```
 
-Add `-run=xxx` to exclude tests from the execution.
+## Understanding benchmark results
+Name, average [ns] of a run, average allocated B of memory per run, average number of allocations per run
+```
+BenchmmarkXX    44541     27849 ns/op    29440 B/op     158 allocs/op
+```
 
-## Observations
+## Conclusions
 
 * stdlib marshalling performance drops when unmarshalling `map[string]interface{}`
