@@ -141,7 +141,9 @@ BenchmarkUnmarshalJsoninter/default-tagmap.json-4          	  523004	      6824 
 
 ## Conclusions
 
-* stdlib marshalling performance drops when unmarshalling tag map (`span.tag`/`span.process.tag`) `map[string]interface{}`
+* stdlib marshalling performance drops (especially allocations increase) when unmarshalling tag map (`span.tag`/`span.process.tag`) `map[string]interface{}`
+* GoJay performs the best for marshalling (`span.tag`/`span.process.tag`) `map[string]interface{}`. It does not increase allocations
+* Fastjson does not provide a way to unmarshal `interface{}` in tag map
 
 [ci-img]: https://github.com/pavolloffay/golang-json-benchmark/workflows/Benchmark/badge.svg
 [ci]: https://github.com/pavolloffay/golang-json-benchmark/actions
