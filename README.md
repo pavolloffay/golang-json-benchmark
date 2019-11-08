@@ -9,7 +9,7 @@ make bench
 ```
 
 ## Understanding benchmark results
-Name, average [ns] of a run, average allocated B of memory per run, average number of allocations per run
+Name, number of runs of the loop per `-test.benchtime`, average [ns] of a run, average allocated B of memory per run, average number of allocations per run
 ```
 BenchmmarkXX    44541     27849 ns/op    29440 B/op     158 allocs/op
 ```
@@ -100,7 +100,6 @@ BenchmarkUnmarshalJsoninter/default-tagmap.json-4          	  173272	      6613 
 BenchmarkMarshalJsoniter/default.json-4                    	  178272	      6423 ns/op	    1800 B/op	       6 allocs/op
 BenchmarkMarshalJsoniter/default-unicode.json-4            	  233517	      4799 ns/op	    1288 B/op	       6 allocs/op
 BenchmarkMarshalJsoniter/default-tagmap.json-4             	  115671	     10225 ns/op	    7933 B/op	      50 allocs/op
-
 ```
 
 
