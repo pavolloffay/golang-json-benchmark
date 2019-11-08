@@ -7,7 +7,7 @@ test:
 
 .PHONY:bench
 bench:
-	GOMAXPROCS=${GOMAXPROCS} go test -bench=. -test.benchtime=${BENCHTIME} -benchmem -run=XX -cpuprofile profile_cpu.out ./pkg/jsontest
+	GOMAXPROCS=${GOMAXPROCS} go test -bench=. -test.benchtime=${BENCHTIME} -benchmem -cpuprofile profile_cpu.out ./pkg/jsontest
 
 .PHONY:profile
 profile:
