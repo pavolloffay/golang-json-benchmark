@@ -2,7 +2,6 @@ package jsontest
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/francoispqt/gojay"
@@ -13,30 +12,23 @@ import (
 func TestParsingFixtureGojay(t *testing.T) {
 	b, err := loadFixture("default.json")
 	require.NoError(t, err)
-	assert.NotNil(t, b)
 
 	span := &Span{}
 	err = gojay.Unmarshal(b, span)
 	require.NoError(t, err)
-
 	spanStd := &Span{}
 	err = json.Unmarshal(b, spanStd)
 	require.NoError(t, err)
-	assert.EqualValues(t, spanStd, span)
+	// unmarshal is the same as stdlib
+	assert.Equal(t, spanStd, span)
 
-	fmt.Println(spanStd.Logs[1].Fields)
-	fmt.Println(spanStd.Logs[1].Fields == nil)
+	goJayBytes, err := gojay.Marshal(span)
+	require.NoError(t, err)
 
-	bb, err := gojay.Marshal(span)
+	spanStd = &Span{}
+	err = json.Unmarshal(goJayBytes, spanStd)
 	require.NoError(t, err)
-	bbStd, err := gojay.Marshal(spanStd)
-	require.NoError(t, err)
-	assert.Equal(t, bbStd, bb)
-
-	span2 := &Span{}
-	err = json.Unmarshal(bb, span2)
-	require.NoError(t, err)
-	assert.Equal(t, span, span2)
+	assert.Equal(t, spanStd, span)
 }
 
 func BenchmarkMarshalGojay(b *testing.B) {
@@ -56,7 +48,9 @@ func (s *Span) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.Uint64Key("duration", s.Duration)
 	enc.ObjectKey("process", &s.Process)
 	enc.ArrayKey("tags", &s.Tags)
-	enc.ObjectKey("tag", &s.Tag)
+	if len(s.Tag) > 0 {
+		enc.ObjectKey("tag", &s.Tag)
+	}
 	enc.ArrayKey("logs", &s.Logs)
 	enc.ArrayKey("references", &s.References)
 }
@@ -67,7 +61,9 @@ func (s *Span) IsNil() bool {
 func (p *Process) MarshalJSONObject(enc *gojay.Encoder) {
 	enc.StringKey("serviceName", p.ServiceName)
 	enc.ArrayKey("tags", &p.Tags)
-	enc.ObjectKey("tag", &p.Tag)
+	if len(p.Tag) > 0 {
+		enc.ObjectKey("tag", &p.Tag)
+	}
 }
 func (p *Process) IsNil() bool {
 	return p == nil
