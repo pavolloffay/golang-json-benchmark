@@ -1,6 +1,6 @@
 module json-benchmark
 
-go 1.12
+go 1.13
 
 require (
 	github.com/francoispqt/gojay v1.2.13
