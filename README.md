@@ -32,6 +32,10 @@ BenchmarkMarshalStdlib/default-tagmap.json          	  362587	      8962 ns/op	 
 BenchmarkMarshalJsoniter/default.json               	  499992	      6932 ns/op	    1800 B/op	       6 allocs/op
 BenchmarkMarshalJsoniter/default-unicode.json       	  612794	      5121 ns/op	    1288 B/op	       6 allocs/op
 BenchmarkMarshalJsoniter/default-tagmap.json        	  245335	     13910 ns/op	    7930 B/op	      50 allocs/op
+BenchmarkMarshalJettison/default.json      	  399955	      8176 ns/op	    1744 B/op	      14 allocs/op
+BenchmarkMarshalJettison/default-unicode.json         	  598621	      5165 ns/op	    1152 B/op	       9 allocs/op
+BenchmarkMarshalJettison/default-tagmap.json          	  323354	     10128 ns/op	    2719 B/op	      27 allocs/op
+
 GOMAXPROCS=1 go test -bench=Unmarshal -test.benchtime=3s -benchmem -cpuprofile profile_cpu.out ./pkg/jsontest
 goos: linux
 goarch: amd64
@@ -65,6 +69,9 @@ BenchmarkMarshalStdlib/default-tagmap.json-4          	  415911	      8413 ns/op
 BenchmarkMarshalJsoniter/default.json-4               	  529898	      6596 ns/op	    1800 B/op	       6 allocs/op
 BenchmarkMarshalJsoniter/default-unicode.json-4       	  615393	      4976 ns/op	    1288 B/op	       6 allocs/op
 BenchmarkMarshalJsoniter/default-tagmap.json-4        	  345463	     10480 ns/op	    7933 B/op	      50 allocs/op
+BenchmarkMarshalJettison/default.json-4      	  413160	      8200 ns/op	    1744 B/op	      14 allocs/op
+BenchmarkMarshalJettison/default-unicode.json-4         	  640046	      5256 ns/op	    1152 B/op	       9 allocs/op
+BenchmarkMarshalJettison/default-tagmap.json-4          	  351909	      9658 ns/op	    2721 B/op	      27 allocs/op
 GOMAXPROCS=4 go test -bench=Unmarshal -test.benchtime=3s -benchmem -cpuprofile profile_cpu.out ./pkg/jsontest
 goos: linux
 goarch: amd64
